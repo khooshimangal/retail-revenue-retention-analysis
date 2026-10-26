@@ -1,4 +1,3 @@
-SHOW VARIABLES LIKE 'local_infile';
 -- 1. Monthly Transaction values
 SELECT
     DATE_FORMAT(invoice_date, '%Y-%m') AS month,
@@ -20,17 +19,19 @@ LIMIT 10;
 
 -- 3. Top merchandise products by net transaction value
 SELECT
-    stock_code,
-    description,
+    UPPER(TRIM(stock_code)) AS stock_code,
+    UPPER(TRIM(description)) AS description,
     ROUND(SUM(quantity * price), 2) AS net_transaction_value,
     SUM(quantity) AS net_quantity,
     COUNT(*) AS transaction_lines
 FROM retail_analysis.retail_transactions
 WHERE description IS NOT NULL
   AND TRIM(description) <> ''
-  AND UPPER(description) NOT LIKE '%POSTAGE%'
-  AND stock_code NOT IN ('DOT', 'POST')
-GROUP BY stock_code, description
+  AND UPPER(TRIM(description)) NOT LIKE '%POSTAGE%'
+  AND UPPER(TRIM(stock_code)) NOT IN ('DOT', 'POST')
+GROUP BY
+    UPPER(TRIM(stock_code)),
+    UPPER(TRIM(description))
 ORDER BY net_transaction_value DESC
 LIMIT 10;
 
@@ -42,9 +43,9 @@ SELECT
 FROM retail_analysis.retail_transactions
 WHERE invoice LIKE 'C%';
 
--- 5. Top customers by qulifying purchase value
+-- 5. Top customers by qualifying purchase value
 SELECT Customer_ID,
-COUNT(DISTINCT invoice) AS invoive_count,
+COUNT(DISTINCT invoice) AS invoice_count,
 ROUND(SUM(quantity * price), 2) AS purchase_value
 FROM retail_analysis.retail_transactions
 WHERE customer_id IS NOT NULL
@@ -85,17 +86,3 @@ SELECT
     ROUND(AVG(average_order_value), 2) AS mean_customer_aov
 FROM customer_aov
 GROUP BY customer_type;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
