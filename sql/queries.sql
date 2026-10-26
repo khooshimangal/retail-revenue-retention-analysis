@@ -1,37 +1,4 @@
 SHOW VARIABLES LIKE 'local_infile';
-TRUNCATE TABLE retail_analysis.retail_transactions;
-LOAD DATA LOCAL INFILE
-'/Users/khooshimangal/retail-revenue-retention-analysis/data/processed/retail_transactions.csv'
-INTO TABLE retail_analysis.retail_transactions
-CHARACTER SET utf8mb4
-FIELDS TERMINATED BY ','
-OPTIONALLY ENCLOSED BY '"'
-ESCAPED BY '"'
-LINES TERMINATED BY '\n'
-IGNORE 1 LINES
-(
-    invoice,
-    stock_code,
-    description,
-    quantity,
-    @invoice_date,
-    price,
-    @customer_id,
-    country
-)
-SET
-    invoice_date = STR_TO_DATE(
-        @invoice_date,
-        '%Y-%m-%d %H:%i:%s'
-    ),
-    customer_id = NULLIF(@customer_id, '');
-    
-SELECT
-    COUNT(*) AS total_rows,
-    MIN(invoice_date) AS first_date,
-    MAX(invoice_date) AS last_date
-FROM retail_analysis.retail_transactions;
-
 -- 1. Monthly Transaction values
 SELECT
     DATE_FORMAT(invoice_date, '%Y-%m') AS month,
